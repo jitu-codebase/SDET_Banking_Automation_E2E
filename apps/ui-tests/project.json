@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "ui-tests",
+  "projectType": "application",
+  "sourceRoot": "apps/ui-tests/src",
+  "tags": ["scope:ui", "type:application"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec bddgen && pnpm exec playwright test",
+        "cwd": "apps/ui-tests"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/ui-tests"
+      }
+    }
+  }
+}

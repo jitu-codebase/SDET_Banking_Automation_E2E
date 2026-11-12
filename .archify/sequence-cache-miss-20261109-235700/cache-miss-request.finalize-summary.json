@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "sequence",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/candidate.json",
+    "sha256": "885843af93158ea63af55b396c0f59f64a3f9e2bca588d585284eebbc17c703d",
+    "bytes": 3441
+  },
+  "artifact": {
+    "path": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/cache-miss-request.html",
+    "sha256": "1ab8a3344cc4c9de119304b6f3e9ef745582924a5987c71bace3cef1d450bd8a",
+    "bytes": 834532
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/cache-miss-request.finalize.json",
+    "summaryReceipt": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/cache-miss-request.finalize-summary.json",
+    "browserCheckReceipt": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/cache-miss-request.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2214,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "api-tests",
+  "projectType": "application",
+  "sourceRoot": "apps/api-tests/src",
+  "tags": ["scope:api", "type:application"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec bddgen && pnpm exec playwright test",
+        "cwd": "apps/api-tests"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/api-tests"
+      }
+    }
+  }
+}

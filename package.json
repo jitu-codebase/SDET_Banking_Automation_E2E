@@ -1,0 +1,25 @@
+{
+  "name": "@sdet-banking-automation/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "test:api": "rimraf test-results && nx run api-tests:test",
+    "typecheck:api": "nx run api-tests:typecheck",
+    "test:ui": "rimraf test-results &&  nx run ui-tests:test",
+    "typecheck:ui": "nx run ui-tests:typecheck"
+  },
+  "private": true,
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@nx/js": "24.0.4",
+    "@nx/workspace": "24.0.4",
+    "@playwright/test": "^1.65.0",
+    "dotenv": "^18.0.9",
+    "nx": "24.0.4",
+    "playwright-bdd": "^9.2.1",
+    "rimraf": "^6.1.4",
+    "typescript": "~6.0.3",
+    "zod": "^4.6.7"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

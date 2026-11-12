@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "api",
+  "projectType": "library",
+  "sourceRoot": "shared-libs/api-lib/src",
+  "tags": ["scope:shared", "type:library"]
+}

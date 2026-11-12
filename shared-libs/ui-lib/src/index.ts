@@ -1,0 +1,10 @@
+export { LandingPage } from "./lib/pages/landing-page";
+export { RegisterPage } from "./lib/pages/register-page";
+export { PersonalDetailPage } from "./lib/pages/personal-details-page";
+export { ContactDetailPage } from "./lib/pages/contact-details-page";
+export { AccountDetailPage } from "./lib/pages/account-details-page";
+export type { AccountType } from "./lib/pages/account-details-page";
+export { IdentityDetailPage } from "./lib/pages/identity-details-page";
+export { FinancialDetailPage } from "./lib/pages/financial-details-page";
+export { DeclarationDetailPage } from "./lib/pages/declaration-details-page";
+export { OnboardingSuccessPage } from "./lib/pages/onboarding-success-page";

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "70ee81dc-986c-4724-82df-fe8ba28d0043",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/candidate.json",
+  "output": "/Users/jitendra/AI/sdet_banking_automation/.archify/sequence-cache-miss-20261109-235700/cache-miss-request.html",
+  "specification": {
+    "sha256": "885843af93158ea63af55b396c0f59f64a3f9e2bca588d585284eebbc17c703d",
+    "bytes": 3441
+  },
+  "artifact": {
+    "sha256": "1ab8a3344cc4c9de119304b6f3e9ef745582924a5987c71bace3cef1d450bd8a",
+    "bytes": 834532
+  }
+}

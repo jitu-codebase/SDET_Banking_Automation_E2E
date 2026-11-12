@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Web Request: API → Redis Cache Miss → PostgreSQL",
+    "subtitle": "Cache miss path: browser request flows through the API, misses Redis, queries Postgres, then fills the cache",
+    "output": ".archify/sequence-cache-miss-20261109-235700/cache-miss-request.html",
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "browser", "type": "external", "label": "Browser", "sublabel": "client" },
+    { "id": "api",     "type": "backend",  "label": "API",     "sublabel": "request handler" },
+    { "id": "redis",   "type": "database", "label": "Redis",   "sublabel": "cache layer" },
+    { "id": "pg",      "type": "database", "label": "PostgreSQL", "sublabel": "source of truth" }
+  ],
+  "segments": [
+    { "from": 150, "to": 270, "label": "Cache Lookup" },
+    { "from": 280, "to": 410, "label": "Cache Miss — DB Fallback" },
+    { "from": 420, "to": 525, "label": "Cache Fill + Response" }
+  ],
+  "messages": [
+    {
+      "id": "http-request",
+      "from": "browser", "to": "api",
+      "y": 160,
+      "label": "GET /resource",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cache-get",
+      "from": "api", "to": "redis",
+      "y": 200,
+      "label": "GET key",
+      "variant": "default"
+    },
+    {
+      "id": "cache-miss",
+      "from": "redis", "to": "api",
+      "y": 230,
+      "label": "nil (cache miss)",
+      "variant": "return",
+      "note": "Key not found — Redis returns nil"
+    },
+    {
+      "id": "db-query",
+      "from": "api", "to": "pg",
+      "y": 300,
+      "label": "SELECT * FROM resource WHERE …",
+      "variant": "emphasis"
+    },
+    {
+      "id": "db-rows",
+      "from": "pg", "to": "api",
+      "y": 340,
+      "label": "rows",
+      "variant": "return"
+    },
+    {
+      "id": "cache-set",
+      "from": "api", "to": "redis",
+      "y": 390,
+      "label": "SET key value EX 300",
+      "variant": "dashed",
+      "note": "TTL 300 s — fills cache for subsequent requests"
+    },
+    {
+      "id": "cache-ack",
+      "from": "redis", "to": "api",
+      "y": 445,
+      "label": "OK",
+      "variant": "return"
+    },
+    {
+      "id": "http-response",
+      "from": "api", "to": "browser",
+      "y": 490,
+      "label": "200 OK — JSON payload",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    { "participant": "api",   "from": 165, "to": 496, "type": "backend"  },
+    { "participant": "redis", "from": 195, "to": 452, "type": "database" },
+    { "participant": "pg",    "from": 295, "to": 348, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Request Path",
+      "items": [
+        "Browser sends an HTTP GET to the API",
+        "API first checks Redis before touching Postgres",
+        "Cache hit would return directly — no DB round-trip"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cache Miss",
+      "items": [
+        "Redis returns nil — key is absent or expired",
+        "API falls back to a Postgres SELECT query",
+        "DB rows are returned to the API for processing"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Cache Fill",
+      "items": [
+        "API writes the result to Redis with a 300 s TTL",
+        "Subsequent identical requests will hit the cache",
+        "Cache fill is fire-and-forget — does not block the response"
+      ]
+    }
+  ]
+}

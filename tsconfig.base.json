@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@config/*": ["./config/*"],
+      "@api-lib": ["./shared-libs/api-lib/src/index.ts"],
+      "@api-lib/*": ["./shared-libs/api-lib/src/lib/*"],
+      "@core": ["./shared-libs/core/src/index.ts"],
+      "@core/*": ["./shared-libs/core/src/lib/data/*"],
+      "@ui-lib": ["./shared-libs/ui-lib/src/index.ts"],
+      "@ui-lib/*": ["./shared-libs/ui-lib/src/lib/*"]
+    }
+  }
+}
