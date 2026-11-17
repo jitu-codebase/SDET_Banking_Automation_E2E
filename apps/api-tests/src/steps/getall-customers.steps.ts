@@ -2,18 +2,19 @@ import { createBdd } from "playwright-bdd";
 
 import { test, expect } from "../fixtures/hybrid.fixture";
 import type { getAllCustomerResponse } from "@api-lib";
+import { logger } from "@core";
 
 const { When, Then } = createBdd(test);
 
 When(
   "admin retrieves customers",
   async ({ getAllCustomerService, testDataContext, scenarioContext }) => {
-    const accessToken = testDataContext.get<string>("accessToken");
-    console.log("CUSTOMER STEP TOKEN EXISTS:", Boolean(accessToken));
+    const accessToken = testDataContext.get<string>("adminAccessToken");
+    logger.debug(`Customer step — token exists: ${Boolean(accessToken)}`, "STEP");
     if (!accessToken) {
       throw new Error("Admin access token not found in TestDataContext");
     }
-    console.log("Admin retreieving");
+    logger.info("Admin retrieving customers...", "STEP");
     const customerResponse = await getAllCustomerService.getAllCustomers(
       {
         offset: 20,
@@ -21,11 +22,10 @@ When(
       },
       accessToken,
     );
-    console.log("Admin retreived");
+    logger.info("Admin retrieved customers successfully", "STEP");
+    testDataContext.set("Customer_Account_List", customerResponse);
     scenarioContext.customerResult = customerResponse;
-    console.log(
-      `All Customers List: ${JSON.stringify(customerResponse, null, 2)}`,
-    );
+    logger.logPayload("All Customers List", customerResponse, "STEP");
   },
 );
 

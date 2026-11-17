@@ -1,5 +1,6 @@
 import { test as base } from "playwright-bdd";
-import { expect } from "@playwright/test";
+import { expect, request as playwrightRequest } from "@playwright/test";
+import { config } from "@config/environment";
 import { TestDataContext } from "@core";
 import {
   ApiClient,
@@ -27,7 +28,7 @@ import {
   DeclarationDetailPage,
   OnboardingSuccessPage,
 } from "@ui-lib";
-import { maskSensitiveData } from "@core";
+import { maskSensitiveData, logger } from "@core";
 // Data shared between steps within one scenario
 type ScenarioContext = {
   loginResult?: AdminLoginResponse;
@@ -48,6 +49,8 @@ type ApiFixtures = {
   financialOnboardingDetailService: FinancialOnboardingDetailService;
   declarationService: DeclarationService;
   registerUserService: RegisterUserService;
+  adminApiClient: ApiClient;
+  adminApiOperationExecutor: ApiOperationExecutor;
 
   landingPage: LandingPage;
   registerPage: RegisterPage;
@@ -66,13 +69,31 @@ export const test = base.extend<ApiFixtures>({
     await use(apiClient);
   },
 
+  adminApiClient: async ({}, use) => {
+    const adminRequestContext = await playwrightRequest.newContext({
+      baseURL: config.BASE_URL,
+    });
+
+    try {
+      const apiClient = new ApiClient(adminRequestContext);
+      await use(apiClient);
+    } finally {
+      await adminRequestContext.dispose();
+    }
+  },
+
+  adminApiOperationExecutor: async ({ adminApiClient }, use) => {
+    const executor = new ApiOperationExecutor(adminApiClient);
+    await use(executor);
+  },
+
   apiOperationExecutor: async ({ apiClient }, use) => {
     const executor = new ApiOperationExecutor(apiClient);
     await use(executor);
   },
 
-  adminLoginService: async ({ apiOperationExecutor }, use) => {
-    const service = new AdminLoginService(apiOperationExecutor);
+  adminLoginService: async ({ adminApiOperationExecutor }, use) => {
+    const service = new AdminLoginService(adminApiOperationExecutor);
     await use(service);
   },
 
@@ -82,15 +103,16 @@ export const test = base.extend<ApiFixtures>({
   testDataContext: async ({}, use) => {
     const dataContext = new TestDataContext();
     await use(dataContext);
-    console.log("\n========== TEST DATA CONTEXT ==========");
-    console.log(
-      JSON.stringify(maskSensitiveData(dataContext.getAll()), null, 2),
+    logger.section("TEST DATA CONTEXT", "FIXTURE");
+    logger.logPayload(
+      "Scenario Data",
+      maskSensitiveData(dataContext.getAll()),
+      "FIXTURE",
     );
-    console.log("=======================================\n");
     dataContext.clear();
   },
-  getAllCustomerService: async ({ apiOperationExecutor }, use) => {
-    const service = new GetAllCustomerService(apiOperationExecutor);
+  getAllCustomerService: async ({ adminApiOperationExecutor }, use) => {
+    const service = new GetAllCustomerService(adminApiOperationExecutor);
     await use(service);
   },
   onboardingPersonalService: async ({ apiOperationExecutor }, use) => {

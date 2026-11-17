@@ -32,7 +32,7 @@ const finalCustomerSchema = z.object({
   createdAt: z.iso.datetime(),
   onboardingStep: z.number(),
   onboardingComplete: z.boolean(),
-  account: customerAccountSchema,
+  account: customerAccountSchema.nullable(),
 });
 
 export const getAllCustomerResponseSchema = z.object({

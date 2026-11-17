@@ -6,7 +6,7 @@ import {
   type ApiRequestOptions,
 } from "./api-client";
 
-import { maskSensitiveData } from "@core";
+import { maskSensitiveData, logger } from "@core";
 
 // Result returned by every API operation
 export type ApiOperationResult<TSuccess, TError> =
@@ -23,9 +23,7 @@ export type ApiOperationResult<TSuccess, TError> =
 
 // Logs payload after masking sensitive information
 const logPayload = (label: string, payload: unknown): void => {
-  console.log(
-    `${label}:\n${JSON.stringify(maskSensitiveData(payload), null, 2)}`,
-  );
+  logger.logPayload(label, maskSensitiveData(payload), "API");
 };
 
 // Playwright multipart file payload shape
@@ -127,9 +125,9 @@ export class ApiOperationExecutor {
       );
     }
 
-    console.log("\n========== API REQUEST ==========");
-    console.log(`Method: ${method}`);
-    console.log(`Endpoint: ${endpoint}`);
+    logger.section("API REQUEST", "API");
+    logger.info(`Method:   ${method}`, "API");
+    logger.info(`Endpoint: ${endpoint}`, "API");
 
     // 2. Prepare safe request payload for logging
     const requestPayloadForLogging =
@@ -173,8 +171,9 @@ export class ApiOperationExecutor {
     try {
       responseBody = await response.json();
     } catch {
-      console.error(
+      logger.error(
         `Unable to parse JSON response. HTTP status: ${response.status()}`,
+        "API",
       );
 
       throw new Error(
@@ -182,10 +181,10 @@ export class ApiOperationExecutor {
       );
     }
 
-    console.log("\n========== API RESPONSE ==========");
-    console.log(`HTTP Status: ${response.status()}`);
+    logger.section("API RESPONSE", "API");
+    logger.info(`HTTP Status: ${response.status()}`, "API");
     logPayload("Response Body", responseBody);
-    console.log("=================================\n");
+    logger.info("=".repeat(40), "API");
 
     // 6. Select schema based on HTTP status
     const selectedSchema = response.ok() ? successSchema : errorSchema;

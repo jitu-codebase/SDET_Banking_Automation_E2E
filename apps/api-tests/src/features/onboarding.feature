@@ -6,7 +6,9 @@ Feature: Personal Details Onboarding
     When user do the registration
     And user submits personal details
     And user submits contact details
-    And user submits account details for accountType "savings"
+    And user submits account details for accountType "current"
     And user submits identity details
     And user submits source of income as "Salaried"
     And user "accept" declaration details
+    And admin retrieves customers
+    Then verify account is available in the customer account list

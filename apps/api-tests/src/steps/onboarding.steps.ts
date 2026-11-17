@@ -10,14 +10,14 @@ import {
 } from "@api-lib";
 import { createPersonalDetailsPayload } from "@api-lib";
 import { test, expect } from "../fixtures/hybrid.fixture";
-import { DynamicDataHelper } from "@core";
+import { DynamicDataHelper, logger } from "@core";
 
-const { When } = createBdd(test);
+const { When, Then } = createBdd(test);
 
 When(
   "user submits personal details",
   async ({ onboardingPersonalService, testDataContext }) => {
-    const accessToken = testDataContext.get<string>("accessToken");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
     const payload = createPersonalDetailsPayload();
     const response = await onboardingPersonalService.savePersonalDetails(
       payload,
@@ -37,7 +37,7 @@ When(
 When(
   "user do the registration",
   async ({ registerUserService, testDataContext }) => {
-    const accessToken = testDataContext.get<string>("accessToken");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
     const emailId = DynamicDataHelper.generateRandomEmailId();
     testDataContext.set<string>("emailId", emailId);
     const registerCustomerPayload = createRegisterCustomerPayload(emailId);
@@ -55,7 +55,7 @@ When(
 When(
   "user submits contact details",
   async ({ onboardingContactDetailsService, testDataContext }) => {
-    const accessToken = testDataContext.get<string>("accessToken");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
     const emailId = testDataContext.get<string>("emailId");
     const contactDetailsPayload =
       createOnboardingContactDetailsPayload(emailId);
@@ -76,8 +76,8 @@ When(
     { onboardingAccountDetailsService, testDataContext },
     accountType: string,
   ) => {
-    console.log("Account type is: " + accountType);
-    const accessToken = testDataContext.get<string>("accessToken");
+    logger.info(`Account type: ${accountType}`, "STEP");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
     const accountDetailsPayload = createOnboardingAccountDetailsPayload(
       accountType as AccountType,
     );
@@ -95,7 +95,7 @@ When(
 When(
   "user submits identity details",
   async ({ onboardingIdentityService, testDataContext }) => {
-    const accessToken = testDataContext.get<string>("accessToken");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
     const identityDetailsPayload = await createOnboardingIdentityPayload();
     const response =
       await onboardingIdentityService.executeOnboardingIdentityDetails(
@@ -140,7 +140,7 @@ When(
     const isAccepted = declarationAccepted === "accept";
 
     // 2. Fetch access token with clear error
-    const accessToken = testDataContext.get<string>("accessToken");
+    const accessToken = testDataContext.get<string>("adminAccessToken");
 
     // 3. Build payload & submit
     const declarationDetailsPayload = createDeclarationPayload(isAccepted);
@@ -174,5 +174,13 @@ When(
     testDataContext.set("customerID", response!.data.customerId);
     testDataContext.set("accountNumber", response!.data.accountNumber);
     testDataContext.set("ifscCode", response!.data.ifscCode);
+  },
+);
+
+Then(
+  "verify account is available in the customer account list",
+  async ({ testDataContext }) => {
+    const response = testDataContext.get("Customer_Account_List");
+    logger.logPayload("All Customers List", response, "STEP");
   },
 );

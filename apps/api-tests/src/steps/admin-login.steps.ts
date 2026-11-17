@@ -1,6 +1,8 @@
 import { createBdd } from "playwright-bdd";
 import { createAdminLoginPayload } from "@api-lib";
 import { test, expect } from "../fixtures/hybrid.fixture";
+import { logger } from "@core";
+
 const { When, Then } = createBdd(test);
 
 When(
@@ -8,11 +10,14 @@ When(
   async ({ adminLoginService, testDataContext, scenarioContext }) => {
     const payload = createAdminLoginPayload();
     const loginResponse = await adminLoginService.adminLogin(payload);
-    console.log("LOGIN EMAIL:", loginResponse.data.user.email);
-    console.log("LOGIN ROLE:", loginResponse.data.user.role);
-    console.log("TOKEN EXISTS:", Boolean(loginResponse.data.accessToken));
-    testDataContext.set("accessToken", loginResponse.data.accessToken);
-    console.log("TOKEN STORED:", Boolean(testDataContext.get("accessToken")));
+    logger.info(`Login email: ${loginResponse.data.user.email}`, "STEP");
+    logger.info(`Login role:  ${loginResponse.data.user.role}`, "STEP");
+    logger.info(`Token exists: ${Boolean(loginResponse.data.accessToken)}`, "STEP");
+    testDataContext.set("adminAccessToken", loginResponse.data.accessToken);
+    logger.debug(
+      `Token stored: ${Boolean(testDataContext.get("adminAccessToken"))}`,
+      "STEP",
+    );
     scenarioContext.loginResult = loginResponse;
   },
 );
@@ -23,5 +28,5 @@ Then("the login should be successful", async ({ scenarioContext }) => {
   expect(result!.success).toBe(true);
   expect(result!.data.accessToken).toBeTruthy();
   expect(result!.data.user.email).toBeTruthy();
-  console.log("Admin logged in successfully");
+  logger.info("Admin logged in successfully", "STEP");
 });
