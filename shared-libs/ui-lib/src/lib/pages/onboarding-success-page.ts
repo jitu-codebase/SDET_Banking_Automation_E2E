@@ -1,7 +1,10 @@
 import { Locator, Page, expect } from "@playwright/test";
+import { BasePage } from "./base-page";
 
-export class OnboardingSuccessPage {
-  constructor(private readonly page: Page) {}
+export class OnboardingSuccessPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
 
   get customerId(): Locator {
     return this.page.locator("#customer-id");
@@ -26,23 +29,35 @@ export class OnboardingSuccessPage {
   }
 
   async getCustomerId(): Promise<string> {
-    return await this.customerId.innerText();
+    return this.action("getCustomerId", async () => {
+      return await this.customerId.innerText();
+    });
   }
+
   async getAccountNumber(): Promise<string> {
-    return await this.accountNumber.innerText();
+    return this.action("getAccountNumber", async () => {
+      return await this.accountNumber.innerText();
+    });
   }
+
   async getIfscCode(): Promise<string> {
-    return await this.ifscCode.innerText();
+    return this.action("getIfscCode", async () => {
+      return await this.ifscCode.innerText();
+    });
   }
 
   async verifySuccessMessageIsVisible(): Promise<void> {
-    await expect(this.successMessage).toBeVisible();
+    await this.action("verifySuccessMessageIsVisible", async () => {
+      await expect(this.successMessage).toBeVisible();
+    });
   }
 
   async verifyIfAccountDetailsAreVisible(): Promise<void> {
-    await expect(this.customerId).toBeVisible();
-    await expect(this.accountNumber).toBeVisible();
-    await expect(this.ifscCode).toBeVisible();
+    await this.action("verifyIfAccountDetailsAreVisible", async () => {
+      await expect(this.customerId).toBeVisible();
+      await expect(this.accountNumber).toBeVisible();
+      await expect(this.ifscCode).toBeVisible();
+    });
   }
 
   async getCustomerAccountDetailsFromUI(): Promise<{
@@ -50,20 +65,23 @@ export class OnboardingSuccessPage {
     accountNumber: string;
     ifscCode: string;
   }> {
-    const customerId = await this.getCustomerId();
-    const accountNumber = await this.getAccountNumber();
-    const ifscCode = await this.getIfscCode();
-    return {
-      customerId,
-      accountNumber,
-      ifscCode,
-    };
+    return this.action("getCustomerAccountDetailsFromUI", async () => {
+      const customerId = await this.getCustomerId();
+      const accountNumber = await this.getAccountNumber();
+      const ifscCode = await this.getIfscCode();
+      return { customerId, accountNumber, ifscCode };
+    });
   }
 
   async navigateToLoginPage(): Promise<void> {
-    await this.goToLoginTextLink.click();
+    await this.action("navigateToLoginPage", async () => {
+      await this.goToLoginTextLink.click();
+    });
   }
+
   async navigateToHomePage(): Promise<void> {
-    await this.backToHomeTextLink.click();
+    await this.action("navigateToHomePage", async () => {
+      await this.backToHomeTextLink.click();
+    });
   }
 }

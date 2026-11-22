@@ -1,9 +1,13 @@
 import { Locator, Page } from "@playwright/test";
+import { BasePage } from "./base-page";
 
 export type AccountType = "Savings Account" | "Current Account";
 
-export class AccountDetailPage {
-  constructor(private readonly page: Page) {}
+export class AccountDetailPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
   get eusernameInputBox(): Locator {
     return this.page.getByRole("textbox", { name: "Username" });
   }
@@ -25,10 +29,12 @@ export class AccountDetailPage {
     password: string,
     accountType: AccountType,
   ): Promise<void> {
-    await this.eusernameInputBox.fill(username);
-    await this.passwordInputBox.first().fill(password);
-    await this.confirmPasswordInputBox.first().fill(password);
-    await this.selectAccountTypeDropDown.selectOption({ label: accountType });
-    await this.nextButton.click();
+    await this.action("createAccountSetup", async () => {
+      await this.eusernameInputBox.fill(username);
+      await this.passwordInputBox.first().fill(password);
+      await this.confirmPasswordInputBox.first().fill(password);
+      await this.selectAccountTypeDropDown.selectOption({ label: accountType });
+      await this.nextButton.click();
+    });
   }
 }

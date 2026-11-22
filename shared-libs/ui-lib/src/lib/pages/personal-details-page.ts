@@ -1,7 +1,11 @@
 import { Locator, Page } from "@playwright/test";
+import { BasePage } from "./base-page";
 
-export class PersonalDetailPage {
-  constructor(private readonly page: Page) {}
+export class PersonalDetailPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
   get firstNameInputBox(): Locator {
     return this.page.getByRole("textbox", { name: "First Name" });
   }
@@ -24,10 +28,12 @@ export class PersonalDetailPage {
     dob: string,
     address: string,
   ): Promise<void> {
-    await this.firstNameInputBox.fill(firstName);
-    await this.lastNameInputBox.fill(lastName);
-    await this.dateOfBirthInputBox.fill(dob);
-    await this.addressInputBox.fill(address);
-    await this.nextButton.click();
+    await this.action("enterPersonalDetails", async () => {
+      await this.firstNameInputBox.fill(firstName);
+      await this.lastNameInputBox.fill(lastName);
+      await this.dateOfBirthInputBox.fill(dob);
+      await this.addressInputBox.fill(address);
+      await this.nextButton.click();
+    });
   }
 }

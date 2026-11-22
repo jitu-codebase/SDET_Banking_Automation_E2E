@@ -9,10 +9,10 @@ const LOG_LEVEL_RANK: Record<LogLevel, number> = {
 };
 
 const LOG_LEVEL_EMOJI: Record<LogLevel, string> = {
-  DEBUG: "🔍",
+  DEBUG: "🔍 ",
   INFO: "ℹ️ ",
   WARN: "⚠️ ",
-  ERROR: "❌",
+  ERROR: "❌ ",
 };
 
 /**

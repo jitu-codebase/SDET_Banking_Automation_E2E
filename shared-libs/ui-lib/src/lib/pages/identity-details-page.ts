@@ -1,8 +1,12 @@
 import { Locator, Page } from "@playwright/test";
 import path from "node:path";
+import { BasePage } from "./base-page";
+import { FileUploadError } from "../errors/ui-errors";
 
-export class IdentityDetailPage {
-  constructor(private readonly page: Page) {}
+export class IdentityDetailPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
 
   get panCardNumInputBox(): Locator {
     return this.page.getByRole("textbox", { name: "PAN Card Number" });
@@ -21,22 +25,32 @@ export class IdentityDetailPage {
     panCardNum: string,
     aadharCardNum: string,
   ): Promise<void> {
-    await this.panCardNumInputBox.fill(panCardNum);
-    await this.aadharCardNumInputBox.fill(aadharCardNum);
-    await this.uploadDoc();
-    await this.nextBtn.click();
+    await this.action("enterIdentityDetails", async () => {
+      await this.panCardNumInputBox.fill(panCardNum);
+      await this.aadharCardNumInputBox.fill(aadharCardNum);
+      await this.uploadDoc();
+      await this.nextBtn.click();
+    });
   }
 
   async uploadDoc(): Promise<void> {
-    try {
-      const filePath = path.resolve(process.cwd(), "../../CodingImp.pdf");
-      const [filechooser] = await Promise.all([
-        this.page.waitForEvent("filechooser"),
-        this.uploadFileAreaBox.click(),
-      ]);
-      await filechooser.setFiles(filePath);
-    } catch (error) {
-      throw new Error(`Error while uploading document: ${error}`);
-    }
+    const filePath = path.resolve(process.cwd(), "../../CodingImp.pdf");
+
+    await this.action("uploadDoc", async () => {
+      try {
+        const [filechooser] = await Promise.all([
+          this.page.waitForEvent("filechooser"),
+          this.uploadFileAreaBox.click(),
+        ]);
+        await filechooser.setFiles(filePath);
+      } catch (error) {
+        throw new FileUploadError(
+          this.pageName,
+          this.page.url(),
+          filePath,
+          error,
+        );
+      }
+    });
   }
 }

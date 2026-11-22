@@ -29,6 +29,8 @@ import {
   DeclarationDetailPage,
   OnboardingSuccessPage,
   LoginPage,
+  DashboardPage,
+  AutomationPracticePage,
 } from "@ui-lib";
 import { maskSensitiveData, logger } from "@core";
 // Data shared between steps within one scenario
@@ -65,6 +67,8 @@ type ApiFixtures = {
   declarationDetailPage: DeclarationDetailPage;
   onboardingSuccessPage: OnboardingSuccessPage;
   loginPage: LoginPage;
+  dashboardPage: DashboardPage;
+  automationPracticePage: AutomationPracticePage;
 };
 
 export const test = base.extend<ApiFixtures>({
@@ -191,6 +195,14 @@ export const test = base.extend<ApiFixtures>({
   loginPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
     await use(loginPage);
+  },
+  dashboardPage: async ({ page }, use) => {
+    const dashboardPage = new DashboardPage(page);
+    await use(dashboardPage);
+  },
+  automationPracticePage: async ({ page }, use) => {
+    const automationPracticePage = new AutomationPracticePage(page);
+    await use(automationPracticePage);
   },
 });
 

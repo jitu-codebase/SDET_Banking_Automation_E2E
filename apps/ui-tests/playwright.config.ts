@@ -13,14 +13,14 @@ const testDir = defineBddConfig({
 export default defineConfig({
   testDir,
   fullyParallel: true,
-  workers: process.env.CI ? 4 : 2,
+  workers: process.env.CI ? 4 : undefined,
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: config.BASE_URL,
-    headless: process.env.CI ? false : true,
+    headless: process.env.CI ? true : false,
     screenshot: "only-on-failure",
     video: "retain-on-failure",
-    navigationTimeout: 15_000,
+    navigationTimeout: 30_000,
     actionTimeout: 20_000,
     trace: "on",
     launchOptions: {

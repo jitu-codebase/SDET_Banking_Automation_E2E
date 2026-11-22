@@ -1,7 +1,11 @@
 import { Locator, Page } from "@playwright/test";
+import { BasePage } from "./base-page";
 
-export class ContactDetailPage {
-  constructor(private readonly page: Page) {}
+export class ContactDetailPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
   get emailAddressInputBox(): Locator {
     return this.page.getByRole("textbox", { name: "Email Address" });
   }
@@ -13,8 +17,10 @@ export class ContactDetailPage {
   }
 
   async enterContactDetails(emailId: string, mob: string): Promise<void> {
-    await this.emailAddressInputBox.fill(emailId);
-    await this.mobileNumberInputBox.fill(mob);
-    await this.nextButton.click();
+    await this.action("enterContactDetails", async () => {
+      await this.emailAddressInputBox.fill(emailId);
+      await this.mobileNumberInputBox.fill(mob);
+      await this.nextButton.click();
+    });
   }
 }

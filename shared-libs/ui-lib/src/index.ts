@@ -1,3 +1,5 @@
+// ── Page Objects ──
+export { BasePage } from "./lib/pages/base-page";
 export { LandingPage } from "./lib/pages/landing-page";
 export { RegisterPage } from "./lib/pages/register-page";
 export { PersonalDetailPage } from "./lib/pages/personal-details-page";
@@ -9,3 +11,13 @@ export { FinancialDetailPage } from "./lib/pages/financial-details-page";
 export { DeclarationDetailPage } from "./lib/pages/declaration-details-page";
 export { OnboardingSuccessPage } from "./lib/pages/onboarding-success-page";
 export { LoginPage } from "./lib/pages/login-page";
+export { DashboardPage } from "./lib/pages/dashboard-page";
+export { AutomationPracticePage } from "./lib/pages/automation-practice-page";
+
+// ── Error Types ──
+export {
+  UIActionError,
+  NavigationError,
+  ElementNotFoundError,
+  FileUploadError,
+} from "./lib/errors/ui-errors";
