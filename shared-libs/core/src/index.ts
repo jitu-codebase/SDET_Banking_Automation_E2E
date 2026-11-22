@@ -4,3 +4,4 @@ export { DynamicDataHelper } from "./lib/utils/dynamic-data";
 export { Constant } from "./lib/utils/constant";
 export { logger } from "./lib/utils/logger";
 export type { LogLevel } from "./lib/utils/logger";
+export { HELPER } from "./lib/utils/helperClass";

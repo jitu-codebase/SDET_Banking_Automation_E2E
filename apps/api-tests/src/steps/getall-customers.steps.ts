@@ -10,7 +10,10 @@ When(
   "admin retrieves customers",
   async ({ getAllCustomerService, testDataContext, scenarioContext }) => {
     const accessToken = testDataContext.get<string>("adminAccessToken");
-    logger.debug(`Customer step — token exists: ${Boolean(accessToken)}`, "STEP");
+    logger.debug(
+      `Customer step — token exists: ${Boolean(accessToken)}`,
+      "STEP",
+    );
     if (!accessToken) {
       throw new Error("Admin access token not found in TestDataContext");
     }
@@ -25,7 +28,6 @@ When(
     logger.info("Admin retrieved customers successfully", "STEP");
     testDataContext.set("Customer_Account_List", customerResponse);
     scenarioContext.customerResult = customerResponse;
-    logger.logPayload("All Customers List", customerResponse, "STEP");
   },
 );
 

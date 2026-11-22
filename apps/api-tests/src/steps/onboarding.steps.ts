@@ -10,7 +10,7 @@ import {
 } from "@api-lib";
 import { createPersonalDetailsPayload } from "@api-lib";
 import { test, expect } from "../fixtures/hybrid.fixture";
-import { DynamicDataHelper, logger } from "@core";
+import { DynamicDataHelper, HELPER, logger } from "@core";
 
 const { When, Then } = createBdd(test);
 
@@ -180,7 +180,12 @@ When(
 Then(
   "verify account is available in the customer account list",
   async ({ testDataContext }) => {
-    const response = testDataContext.get("Customer_Account_List");
-    logger.logPayload("All Customers List", response, "STEP");
+    console.log("In test");
+    HELPER.verifyCustomerDetailsAfterOnboarding(
+      testDataContext.get("Customer_Account_List"),
+      testDataContext.get("customerID"),
+      testDataContext.get("accountNumber"),
+      true,
+    );
   },
 );
