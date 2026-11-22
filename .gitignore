@@ -48,3 +48,9 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+# playwright-bdd generated feature specs
+apps/api-tests/.features-gen/
+apps/ui-tests/.feature-gen/
+playwright-report
+test-results
+**/*.html

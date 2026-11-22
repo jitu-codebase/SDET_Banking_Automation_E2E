@@ -8,3 +8,4 @@ export { IdentityDetailPage } from "./lib/pages/identity-details-page";
 export { FinancialDetailPage } from "./lib/pages/financial-details-page";
 export { DeclarationDetailPage } from "./lib/pages/declaration-details-page";
 export { OnboardingSuccessPage } from "./lib/pages/onboarding-success-page";
+export { LoginPage } from "./lib/pages/login-page";

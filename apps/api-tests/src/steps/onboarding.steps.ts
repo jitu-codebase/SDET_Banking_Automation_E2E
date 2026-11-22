@@ -189,3 +189,171 @@ Then(
     );
   },
 );
+
+When(
+  "I completes full onboarding for accountType {string} with source of income {string} and declaration {string}",
+  async (
+    {
+      onboardingPersonalService,
+      registerUserService,
+      onboardingContactDetailsService,
+      onboardingAccountDetailsService,
+      onboardingIdentityService,
+      financialOnboardingDetailService,
+      declarationService,
+      testDataContext,
+    },
+    accountType: string,
+    sourceOfIncome: string,
+    declarationAccepted: string,
+  ) => {
+    // Validate declaration input up-front
+    expect(
+      ["accept", "reject"],
+      `Invalid declaration input: "${declarationAccepted}". Expected "accept" or "reject".`,
+    ).toContain(declarationAccepted);
+
+    const accessToken = testDataContext.get<string>("adminAccessToken");
+
+    // ---------------------------------------------------------------
+    // Step 0: Registration
+    // ---------------------------------------------------------------
+    const emailId = DynamicDataHelper.generateRandomEmailId();
+    testDataContext.set<string>("emailId", emailId);
+    const registerCustomerPayload = createRegisterCustomerPayload(emailId);
+    const registerResponse = await registerUserService.registerUser(
+      registerCustomerPayload,
+      accessToken,
+    );
+    expect(registerResponse, "Registration returned no response").toBeDefined();
+    expect(registerResponse!.success, "Registration was not successful").toBe(
+      true,
+    );
+    testDataContext.set(
+      "registrationCustomerId",
+      registerResponse.data.customerId,
+    );
+
+    // ---------------------------------------------------------------
+    // Step 1: Personal details
+    // ---------------------------------------------------------------
+    const personalPayload = createPersonalDetailsPayload();
+    const personalResponse =
+      await onboardingPersonalService.savePersonalDetails(
+        personalPayload,
+        accessToken,
+      );
+    expect(
+      personalResponse,
+      "Personal details submission returned no response",
+    ).toBeDefined();
+    expect(personalResponse!.success).toBe(true);
+    expect(personalResponse!.data.step).toBe(1);
+    expect(personalResponse!.data.nextStep).toBe("/onboarding/contact");
+    expect(personalResponse!.message).toBe("Personal details saved");
+    testDataContext.set("firstName", personalPayload.firstName);
+    testDataContext.set("lastName", personalPayload.lastName);
+
+    // ---------------------------------------------------------------
+    // Step 2: Contact details
+    // ---------------------------------------------------------------
+    const contactPayload = createOnboardingContactDetailsPayload(emailId);
+    const contactResponse =
+      await onboardingContactDetailsService.sendContactDetail(
+        contactPayload,
+        accessToken,
+      );
+    expect(
+      contactResponse,
+      "Contact details submission returned no response",
+    ).toBeDefined();
+    expect(contactResponse!.success).toBe(true);
+    expect(contactResponse!.data.step).toBe(2);
+
+    // ---------------------------------------------------------------
+    // Step 3: Account details
+    // ---------------------------------------------------------------
+    logger.info(`Account type: ${accountType}`, "STEP");
+    const accountPayload = createOnboardingAccountDetailsPayload(
+      accountType as AccountType,
+    );
+    const accountResponse =
+      await onboardingAccountDetailsService.sendAccountDetails(
+        accountPayload,
+        accessToken,
+      );
+    expect(
+      accountResponse,
+      "Account details submission returned no response",
+    ).toBeDefined();
+    expect(accountResponse!.success).toBe(true);
+    expect(accountResponse!.data.step).toBe(3);
+
+    // ---------------------------------------------------------------
+    // Step 4: Identity details
+    // ---------------------------------------------------------------
+    const identityPayload = await createOnboardingIdentityPayload();
+    const identityResponse =
+      await onboardingIdentityService.executeOnboardingIdentityDetails(
+        identityPayload,
+        accessToken,
+      );
+    expect(
+      identityResponse,
+      "Identity details submission returned no response",
+    ).toBeDefined();
+    expect(identityResponse!.success).toBe(true);
+    expect(identityResponse!.data.step).toBe(4);
+
+    // ---------------------------------------------------------------
+    // Step 5: Financial details (source of income)
+    // ---------------------------------------------------------------
+    const financialPayload =
+      createOnboardingFinancialDetailsPayload(sourceOfIncome);
+    const financialResponse =
+      await financialOnboardingDetailService.submitFinancialDetails(
+        financialPayload,
+      );
+    expect(
+      financialResponse,
+      "Financial details submission returned no response",
+    ).toBeDefined();
+    expect(financialResponse!.success).toBe(true);
+    expect(financialResponse!.data.step).toBe(5);
+
+    // ---------------------------------------------------------------
+    // Step 6: Declaration
+    // ---------------------------------------------------------------
+    const isAccepted = declarationAccepted === "accept";
+    const declarationPayload = createDeclarationPayload(isAccepted);
+    const declarationResponse =
+      await declarationService.submitDeclarationDetails(
+        declarationPayload,
+        accessToken,
+      );
+    expect(
+      declarationResponse,
+      "Declaration submission returned no response",
+    ).toBeDefined();
+    expect(
+      declarationResponse!.success,
+      "Declaration submission was not successful",
+    ).toBe(true);
+    expect(
+      declarationResponse!.data,
+      "Declaration response missing required data",
+    ).toMatchObject({
+      customerId: expect.any(String),
+      accountNumber: expect.any(String),
+      ifscCode: expect.any(String),
+    });
+
+    // Persist final artifacts to context
+    testDataContext.set("customerID", declarationResponse!.data.customerId);
+    testDataContext.set(
+      "accountNumber",
+      declarationResponse!.data.accountNumber,
+    );
+    testDataContext.set("ifscCode", declarationResponse!.data.ifscCode);
+  },
+);

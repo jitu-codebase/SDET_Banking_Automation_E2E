@@ -14,6 +14,7 @@ import {
   FinancialOnboardingDetailService,
   DeclarationService,
   RegisterUserService,
+  DeleteCustomerRecordService,
 } from "@api-lib";
 import type { AdminLoginResponse, getAllCustomerResponse } from "@api-lib";
 
@@ -27,6 +28,7 @@ import {
   FinancialDetailPage,
   DeclarationDetailPage,
   OnboardingSuccessPage,
+  LoginPage,
 } from "@ui-lib";
 import { maskSensitiveData, logger } from "@core";
 // Data shared between steps within one scenario
@@ -51,6 +53,7 @@ type ApiFixtures = {
   registerUserService: RegisterUserService;
   adminApiClient: ApiClient;
   adminApiOperationExecutor: ApiOperationExecutor;
+  deleteCustomerRecordService: DeleteCustomerRecordService;
 
   landingPage: LandingPage;
   registerPage: RegisterPage;
@@ -61,6 +64,7 @@ type ApiFixtures = {
   financialDetailPage: FinancialDetailPage;
   declarationDetailPage: DeclarationDetailPage;
   onboardingSuccessPage: OnboardingSuccessPage;
+  loginPage: LoginPage;
 };
 
 export const test = base.extend<ApiFixtures>({
@@ -143,6 +147,10 @@ export const test = base.extend<ApiFixtures>({
     const service = new RegisterUserService(apiOperationExecutor);
     await use(service);
   },
+  deleteCustomerRecordService: async ({ adminApiOperationExecutor }, use) => {
+    const service = new DeleteCustomerRecordService(adminApiOperationExecutor);
+    await use(service);
+  },
 
   landingPage: async ({ page }, use) => {
     const landingPage = new LandingPage(page);
@@ -179,6 +187,10 @@ export const test = base.extend<ApiFixtures>({
   onboardingSuccessPage: async ({ page }, use) => {
     const onboardingSuccessPage = new OnboardingSuccessPage(page);
     await use(onboardingSuccessPage);
+  },
+  loginPage: async ({ page }, use) => {
+    const loginPage = new LoginPage(page);
+    await use(loginPage);
   },
 });
 

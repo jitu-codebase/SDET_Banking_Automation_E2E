@@ -143,3 +143,13 @@ export type {
 
 export { createRegisterCustomerPayload } from "./lib/factories/register-user.factory";
 export { RegisterUserService } from "./lib/services/register-user.service";
+
+export {
+  deleteCustomerRecordRequestSchema,
+  deleteCustomerRecordResponseSchema,
+  deleteCustomerRecordResponseErrorSchema,
+  type deleteCustomerRecordRequest,
+  type deleteCustomerRecordResponse,
+  type deleteCustomerRecordResponseError,
+} from "./lib/schemas/delete-customers-records.schema";
+export { DeleteCustomerRecordService } from "./lib/services/delete-customers-records.service";

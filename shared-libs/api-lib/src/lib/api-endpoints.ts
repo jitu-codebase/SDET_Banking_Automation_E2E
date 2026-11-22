@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
 
   CUSTOMERS: {
     GET_ALL: "/api/customer",
+    DELETE_RECORD: "/api/customer/{customerId}",
   },
   ONBOARDING: {
     REGISTER_USER: "/api/auth/register",
