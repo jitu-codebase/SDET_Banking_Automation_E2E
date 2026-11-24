@@ -24,7 +24,7 @@ export default defineConfig({
     actionTimeout: 20_000,
     trace: "on",
     launchOptions: {
-      slowMo: 500,
+      slowMo: 700,
     },
   },
   expect: {

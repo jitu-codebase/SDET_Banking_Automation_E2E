@@ -44,3 +44,68 @@ Then(
     logger.info(`${fruits} is selected and verified successfully`);
   },
 );
+
+Then(
+  "I select {string} radio button",
+  async ({ automationPracticePage }, radioButton: string) => {
+    await automationPracticePage.selectRadioButton(radioButton);
+    logger.info(`${radioButton} is selected successfully`);
+  },
+);
+
+Then(
+  "I select {string} check box",
+  async ({ automationPracticePage }, checkBox: string) => {
+    await automationPracticePage.selectCheckBox(checkBox);
+    logger.info(`${checkBox} is selected successfully`);
+  },
+);
+
+Then("I upload file", async ({ automationPracticePage }) => {
+  await automationPracticePage.uploadDoc();
+  logger.info("File uploaded successfully");
+});
+
+Then(
+  "I fill full name {string} and select role {string} in iframe",
+  async ({ automationPracticePage }, fullName: string, role: string) => {
+    await automationPracticePage.fillApplicationInIframe(fullName, role);
+    logger.info("Full name and role filled successfully");
+  },
+);
+
+Then(
+  "I validate javascript {string} alerts",
+  async ({ automationPracticePage }, alertType: string) => {
+    if (alertType === "normal") {
+      await automationPracticePage.handleNormalAlert();
+    }
+    if (alertType === "confirm") {
+      await automationPracticePage.handleConfirmAlert();
+    }
+    if (alertType === "prompt") {
+      await automationPracticePage.handlePromptAlert();
+    }
+  },
+);
+
+Then("I validate new tab", async ({ automationPracticePage }) => {
+  await automationPracticePage.handleNewTab();
+  logger.info("New tab handled successfully");
+});
+
+Then("I validate pop up window", async ({ automationPracticePage }) => {
+  await automationPracticePage.handlePopUpWindow();
+  logger.info("Pop up window handled successfully");
+});
+
+Then(
+  "I fill form in new tab and then in parent tab",
+  async ({ automationPracticePage, dashboardPage, testDataContext }) => {
+    await automationPracticePage.fillFormInNewTab(
+      dashboardPage.automationLabLink,
+      testDataContext.get<string>("emailId"),
+      config.DEMO_PASSWORD,
+    );
+  },
+);

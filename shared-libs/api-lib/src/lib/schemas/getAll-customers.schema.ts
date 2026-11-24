@@ -5,29 +5,21 @@ export const getAllCustomerRequestSchema = z.object({
   limit: z.coerce.number().int().positive(),
 });
 
-export const customerSchema = z.object({
-  id: z.string(),
-  customerId: z.string().min(1),
-  email: z.email(),
-  username: z.string(),
-  role: z.string(),
-  createdAt: z.iso.datetime(),
-  onboardingStep: z.number(),
-  onboardingComplete: z.boolean(),
-});
-
 export const customerAccountSchema = z.object({
   accountNumber: z.string(),
+  ifscCode: z.string(),
   balance: z.number(),
   accountType: z.string(),
   isActive: z.boolean(),
 });
 
-const finalCustomerSchema = z.object({
+const finalCustomerSchema = z.strictObject({
   id: z.string(),
-  customerId: z.string(),
+  customerId: z.string().min(1),
   email: z.email(),
   username: z.string(),
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
   role: z.string(),
   createdAt: z.iso.datetime(),
   onboardingStep: z.number(),

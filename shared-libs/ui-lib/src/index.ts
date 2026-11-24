@@ -21,3 +21,7 @@ export {
   ElementNotFoundError,
   FileUploadError,
 } from "./lib/errors/ui-errors";
+
+// - Components
+export { UploadFileComponents } from "./lib/components/upload-file.components";
+export { JsalertComponents } from "./lib/components/jsalert.components";

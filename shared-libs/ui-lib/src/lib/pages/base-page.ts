@@ -48,10 +48,22 @@ export abstract class BasePage {
         throw error;
       }
 
+      // ── 1. Log the error IMMEDIATELY (sync) before any async work ──
+      // page.url() is synchronous in Playwright — always safe to call.
       const url = this.page.url();
-      const title = await this.page.title().catch(() => "<unavailable>");
 
-      // Best-effort screenshot at the exact moment of failure
+      logger.error(
+        `✖ ${actionName} failed | URL: ${url}`,
+        this.pageName,
+      );
+
+      if (error instanceof Error) {
+        logger.error(`  Cause: ${error.message}`, this.pageName);
+      } else {
+        logger.error(`  Cause: ${String(error)}`, this.pageName);
+      }
+
+      // ── 2. Best-effort async enrichment (may be killed by test timeout) ──
       const safeName = actionName.replace(/[^a-zA-Z0-9]/g, "-");
       const screenshotPath = `test-results/screenshots/${this.pageName}-${safeName}-${Date.now()}.png`;
 
@@ -69,15 +81,6 @@ export abstract class BasePage {
             this.pageName,
           );
         });
-
-      logger.error(
-        `✖ ${actionName} failed | URL: ${url} | Title: ${title}`,
-        this.pageName,
-      );
-
-      if (error instanceof Error) {
-        logger.error(`  Cause: ${error.message}`, this.pageName);
-      }
 
       throw new UIActionError(actionName, this.pageName, url, error);
     }

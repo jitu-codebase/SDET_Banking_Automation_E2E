@@ -31,6 +31,7 @@ import {
   LoginPage,
   DashboardPage,
   AutomationPracticePage,
+  JsalertComponents,
 } from "@ui-lib";
 import { maskSensitiveData, logger } from "@core";
 // Data shared between steps within one scenario
@@ -69,6 +70,7 @@ type ApiFixtures = {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;
   automationPracticePage: AutomationPracticePage;
+  jsalertComponents: JsalertComponents;
 };
 
 export const test = base.extend<ApiFixtures>({
@@ -203,6 +205,11 @@ export const test = base.extend<ApiFixtures>({
   automationPracticePage: async ({ page }, use) => {
     const automationPracticePage = new AutomationPracticePage(page);
     await use(automationPracticePage);
+  },
+
+  jsalertComponents: async ({ page }, use) => {
+    const jsalertComponents = new JsalertComponents(page);
+    await use(jsalertComponents);
   },
 });
 

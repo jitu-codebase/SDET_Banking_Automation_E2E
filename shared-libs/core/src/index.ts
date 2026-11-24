@@ -5,3 +5,4 @@ export { Constant } from "./lib/utils/constant";
 export { logger } from "./lib/utils/logger";
 export type { LogLevel } from "./lib/utils/logger";
 export { HELPER } from "./lib/utils/helperClass";
+export { formData } from "./lib/data/form-data";

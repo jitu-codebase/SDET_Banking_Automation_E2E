@@ -1,7 +1,7 @@
 import { Locator, Page } from "@playwright/test";
 import path from "node:path";
 import { BasePage } from "./base-page";
-import { FileUploadError } from "../errors/ui-errors";
+import { UploadFileComponents } from "../components/upload-file.components";
 
 export class IdentityDetailPage extends BasePage {
   constructor(page: Page) {
@@ -35,22 +35,9 @@ export class IdentityDetailPage extends BasePage {
 
   async uploadDoc(): Promise<void> {
     const filePath = path.resolve(process.cwd(), "../../CodingImp.pdf");
-
-    await this.action("uploadDoc", async () => {
-      try {
-        const [filechooser] = await Promise.all([
-          this.page.waitForEvent("filechooser"),
-          this.uploadFileAreaBox.click(),
-        ]);
-        await filechooser.setFiles(filePath);
-      } catch (error) {
-        throw new FileUploadError(
-          this.pageName,
-          this.page.url(),
-          filePath,
-          error,
-        );
-      }
-    });
+    await new UploadFileComponents(this.page).uploadFile(
+      filePath,
+      this.uploadFileAreaBox,
+    );
   }
 }

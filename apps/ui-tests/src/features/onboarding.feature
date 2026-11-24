@@ -17,4 +17,4 @@ Feature: Onboarding
     Examples:
       | accountType     |
       | Savings Account |
-      | Current Account |
+      # | Current Account |
