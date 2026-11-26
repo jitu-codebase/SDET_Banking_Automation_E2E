@@ -52,10 +52,7 @@ export abstract class BasePage {
       // page.url() is synchronous in Playwright — always safe to call.
       const url = this.page.url();
 
-      logger.error(
-        `✖ ${actionName} failed | URL: ${url}`,
-        this.pageName,
-      );
+      logger.error(`✖ ${actionName} failed | URL: ${url}`, this.pageName);
 
       if (error instanceof Error) {
         logger.error(`  Cause: ${error.message}`, this.pageName);
@@ -76,10 +73,7 @@ export abstract class BasePage {
           );
         })
         .catch(() => {
-          logger.warn(
-            `  Could not capture failure screenshot`,
-            this.pageName,
-          );
+          logger.warn(`  Could not capture failure screenshot`, this.pageName);
         });
 
       throw new UIActionError(actionName, this.pageName, url, error);

@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "test:api": "rimraf test-results && nx run api-tests:test",
+    "clean:api": "rimraf apps/api-tests/test-results apps/api-tests/playwright-report apps/api-tests/reports",
+    "clean:ui": "rimraf apps/ui-tests/test-results apps/ui-tests/playwright-report apps/ui-tests/reports",
+    "test:api": "pnpm clean:api && nx run api-tests:test",
     "typecheck:api": "nx run api-tests:typecheck",
-    "test:ui": "rimraf test-results &&  nx run ui-tests:test",
-    "typecheck:ui": "nx run ui-tests:typecheck"
+    "test:ui": "pnpm clean:ui && nx run ui-tests:test",
+    "typecheck:ui": "nx run ui-tests:typecheck",
+    "report:api": "pnpm exec playwright show-report apps/api-tests/playwright-report",
+    "report:ui": "pnpm exec playwright show-report apps/ui-tests/playwright-report"
   },
   "private": true,
   "devDependencies": {
@@ -21,5 +25,8 @@
     "typescript": "~6.0.3",
     "zod": "^4.6.7"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.20.2 <21"
+  }
 }

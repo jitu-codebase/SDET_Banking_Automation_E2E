@@ -1,15 +1,46 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-# compiled output
-dist
-tmp
-out-tsc
+# ==========================================
+# Dependencies
+# ==========================================
+node_modules/
 
-# dependencies
-node_modules
+# ==========================================
+# Build and compiled output
+# ==========================================
+dist/
+tmp/
+out-tsc/
+coverage/
 
+# ==========================================
+# Nx cache and generated data
+# ==========================================
+.nx/cache/
+.nx/workspace-data/
+.nx/migrate-runs/
+
+# ==========================================
+# Environment files and secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Playwright test artifacts
+# ==========================================
+test-results/
+playwright-report/
+reports/
+
+# Playwright-BDD generated feature specs
+apps/api-tests/.features-gen/
+apps/ui-tests/.feature-gen/
+
+# ==========================================
 # IDEs and editors
-/.idea
+# ==========================================
+.idea/
 .project
 .classpath
 .c9/
@@ -17,40 +48,36 @@ node_modules
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
+# VS Code
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
+# ==========================================
+# System files
+# ==========================================
 .DS_Store
 Thumbs.db
 
-.nx/cache
-.nx/workspace-data
-.nx/migrate-runs
-.claude/worktrees
-.claude/settings.local.json
+# ==========================================
+# Logs and miscellaneous files
+# ==========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+testem.log
+typings/
 
-# Environment files and secrets
-.env
-.env.*
-!.env.example
-# playwright-bdd generated feature specs
-apps/api-tests/.features-gen/
-apps/ui-tests/.feature-gen/
-playwright-report
-test-results
-**/*.html
+.sass-cache/
+connect.lock
+libpeerconnection.log
+
+# ==========================================
+# Claude local configuration
+# ==========================================
+.claude/worktrees/
+.claude/settings.local.json

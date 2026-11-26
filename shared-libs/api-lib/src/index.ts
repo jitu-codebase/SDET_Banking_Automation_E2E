@@ -20,7 +20,6 @@ export type { HttpMethod, ApiRequestOptions } from "./lib/clients/api-client";
 
 export {
   getAllCustomerRequestSchema,
-  customerSchema,
   customerAccountSchema,
   getAllCustomerResponseSchema,
   getAllUserErrorSchema,

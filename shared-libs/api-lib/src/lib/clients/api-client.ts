@@ -1,4 +1,4 @@
-import { APIRequestContext, APIResponse } from "@playwright/test";
+import type { APIRequestContext, APIResponse } from "@playwright/test";
 
 // Supported HTTP methods
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

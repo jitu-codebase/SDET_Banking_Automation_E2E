@@ -17,13 +17,11 @@ export class HELPER {
         customer.account?.accountNumber === accountNumber &&
         customer.account?.isActive === isActive,
     );
-    if (match) {
-      console.log("Customer details verified successfully");
-    } else {
-      console.warn(
-        `No matching customer for customerId=${customerId}, accountNumber=${accountNumber}, isActive=${isActive}`,
+    if (!match) {
+      throw new Error(
+        `Customer verification failed: No matching customer found for customerId=${customerId}`,
       );
-    }
+    } 
   }
 
   static async deleteAllCustomersExceptProtectedUsers(

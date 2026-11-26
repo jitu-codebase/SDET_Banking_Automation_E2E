@@ -103,7 +103,6 @@ Then(
   "I fill form in new tab and then in parent tab",
   async ({ automationPracticePage, dashboardPage, testDataContext }) => {
     await automationPracticePage.fillFormInNewTab(
-      dashboardPage.automationLabLink,
       testDataContext.get<string>("emailId"),
       config.DEMO_PASSWORD,
     );

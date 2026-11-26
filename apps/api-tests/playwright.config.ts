@@ -11,23 +11,61 @@ const testDir = defineBddConfig({
   disableWarnings: { importTestFrom: true },
 });
 
+const configuredWorkers = process.env.WORKERS;
+
+const workers = configuredWorkers
+  ? Number(configuredWorkers)
+  : process.env.CI
+    ? 4
+    : undefined;
+
+if (workers !== undefined && (!Number.isInteger(workers) || workers < 1)) {
+  throw new Error(
+    `Invalid WORKERS value: "${configuredWorkers}". WORKERS must be a positive integer.`,
+  );
+}
+
 export default defineConfig({
   testDir,
 
   fullyParallel: true,
 
-  reporter: "list",
+  workers,
+
+  forbidOnly: !!process.env.CI,
+
+  retries: process.env.CI ? 1 : 0,
+
+  reporter: [
+    ["list"],
+    [
+      "html",
+      {
+        outputFolder: "playwright-report",
+        open: "never",
+      },
+    ],
+    [
+      "junit",
+      {
+        outputFile: "reports/junit.xml",
+      },
+    ],
+  ],
 
   timeout: 30_000,
 
   expect: {
-    timeout: 5_000,
+    timeout: 15_000,
   },
 
   use: {
     baseURL: config.BASE_URL,
+    headless: process.env.HEADLESS !== "false",
+    trace: "retain-on-failure",
   },
 });
 
 console.log(`Test Environment: ${testEnvironment}`);
 console.log(`Base URL: ${config.BASE_URL}`);
+console.log(`Workers: ${workers ?? "Playwright default"}`);

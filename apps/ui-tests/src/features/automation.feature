@@ -8,16 +8,13 @@ Feature: This feature will do the onboarding using API and do the login in UI us
     And I do the login using api data context in UI
     Then I land on "dashboard" page
     And I navigate to "Automation Lab" page from nav_menu
-
-  @skip
+  
   Scenario: Validate fruits drop down functionality
     Then I select "banana" from fruits drop down
 
-  @skip
   Scenario: Validate radio buttons
     Then I select "Male" radio button
 
-  @skip
   Scenario: Validate check boxes
     Then I select "Terms" check box
 

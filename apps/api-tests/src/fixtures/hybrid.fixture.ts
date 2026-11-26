@@ -82,6 +82,9 @@ export const test = base.extend<ApiFixtures>({
   adminApiClient: async ({}, use) => {
     const adminRequestContext = await playwrightRequest.newContext({
       baseURL: config.BASE_URL,
+      extraHTTPHeaders: {
+        Accept: "application/json",
+      },
     });
 
     try {
@@ -112,14 +115,20 @@ export const test = base.extend<ApiFixtures>({
   },
   testDataContext: async ({}, use) => {
     const dataContext = new TestDataContext();
-    await use(dataContext);
-    logger.section("TEST DATA CONTEXT", "FIXTURE");
-    logger.logPayload(
-      "Scenario Data",
-      maskSensitiveData(dataContext.getAll()),
-      "FIXTURE",
-    );
-    dataContext.clear();
+    try {
+      await use(dataContext);
+    } finally {
+      try {
+        logger.section("TEST DATA CONTEXT", "FIXTURE");
+        logger.logPayload(
+          "Scenario Data",
+          maskSensitiveData(dataContext.getAll()),
+          "FIXTURE",
+        );
+      } finally {
+        dataContext.clear();
+      }
+    }
   },
   getAllCustomerService: async ({ adminApiOperationExecutor }, use) => {
     const service = new GetAllCustomerService(adminApiOperationExecutor);

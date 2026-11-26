@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
+import { randomUUID } from "node:crypto";
 
 export class DynamicDataHelper {
   static generateRandomEmailId(): string {
-    return `${Math.random().toString(36).substring(2, 15)}@gmail.com`;
+    return `automation-${randomUUID()}@gmail.com`;
   }
 
   static generateRandomFirstName(): string {

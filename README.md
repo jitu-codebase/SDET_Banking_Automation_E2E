@@ -1,13 +1,15 @@
 # 🏦 Banking Automation Test Suite (SDET)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Playwright](https://img.shields.io/badge/Playwright-1.4x-green?logo=playwright)](https://playwright.dev/)
-[![Playwright BDD](https://img.shields.io/badge/Playwright--BDD-Cucumber-brightgreen?logo=cucumber)](https://vitalets.github.io/playwright-bdd/)
-[![Nx Monorepo](https://img.shields.io/badge/Nx-Workspace-blueviolet?logo=nx)](https://nx.dev/)
-[![pnpm](https://img.shields.io/badge/pnpm-10.x-orange?logo=pnpm)](https://pnpm.io/)
-[![Zod](https://img.shields.io/badge/Zod-Schema--Validation-blue?logo=zod)](https://zod.dev/)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.x-blue?logo=typescript)
+![Playwright](https://img.shields.io/badge/Playwright-1.65-green?logo=playwright)
+![Playwright BDD](https://img.shields.io/badge/Playwright--BDD-Cucumber-brightgreen?logo=cucumber)
+![Nx](https://img.shields.io/badge/Nx-24.x-blueviolet?logo=nx)
+![pnpm](https://img.shields.io/badge/pnpm-10.x-orange?logo=pnpm)
+![Zod](https://img.shields.io/badge/Zod-Schema--Validation-blue?logo=zod)
 
-An enterprise-grade SDET test automation framework built for a digital banking application. Designed as an **Nx monorepo** with **pnpm workspaces**, this project combines **Playwright**, **Playwright-BDD (Cucumber/Gherkin)**, **Zod schema validation**, and **TypeScript** to deliver robust, scalable, and type-safe API, UI, and hybrid end-to-end tests.
+An SDET automation framework for a digital banking application, built using **Nx Monorepo**, **pnpm workspaces**, **Playwright**, **Playwright-BDD (Cucumber/Gherkin)**, **TypeScript**, and **Zod**.
+
+The framework supports API, UI, and hybrid end-to-end testing with reusable shared libraries, scenario-level test data management, schema validation, parallel execution, and structured reporting.
 
 ---
 
@@ -21,153 +23,169 @@ An enterprise-grade SDET test automation framework built for a digital banking a
 - [Getting Started](#-getting-started)
 - [Environment Configuration](#-environment-configuration)
 - [Running Tests](#-running-tests)
+- [Playwright Execution Configuration](#-playwright-execution-configuration)
 - [Test Reports & Artifacts](#-test-reports--artifacts)
-- [Adding New Tests (Workflow Guide)](#-adding-new-tests-workflow-guide)
-  - [Adding an API Service & Feature](#1-adding-an-api-service--feature)
-  - [Adding a Page Object & UI Feature](#2-adding-a-page-object--ui-feature)
+- [Adding New Tests](#-adding-new-tests)
 - [Troubleshooting & FAQ](#-troubleshooting--faq)
+- [License](#-license)
 
 ---
 
 ## 🏛 Architecture Overview
 
-The repository adopts a modular **Clean Architecture** powered by an **Nx Monorepo**:
+The repository follows a modular architecture using an Nx Monorepo.
 
+```text
+                         ┌──────────────────────────────┐
+                         │     Playwright Test Runner   │
+                         └──────────────┬───────────────┘
+                                        │
+                         ┌──────────────▼───────────────┐
+                         │       Hybrid Fixtures       │
+                         │ apiTest / pageTest / hybridTest│
+                         └──────────────┬───────────────┘
+                                        │
+                 ┌──────────────────────┴──────────────────────┐
+                 │                                             │
+       ┌─────────▼──────────┐                       ┌──────────▼─────────┐
+       │   apps/api-tests   │                       │    apps/ui-tests   │
+       │                    │                       │                    │
+       │ Feature Files      │                       │ Feature Files      │
+       │ Step Definitions   │                       │ Step Definitions   │
+       │ API Fixtures       │                       │ Page Fixtures      │
+       └─────────┬──────────┘                       └──────────┬─────────┘
+                 │                                             │
+                 ▼                                             ▼
+       ┌────────────────────┐                       ┌────────────────────┐
+       │      @api-lib      │                       │      @ui-lib       │
+       │                    │                       │                    │
+       │ API Client         │                       │ Page Objects       │
+       │ Operation Executor │                       │ UI Actions         │
+       │ Domain Services    │                       │ Locators           │
+       │ Zod Schemas        │                       │                    │
+       └─────────┬──────────┘                       └──────────┬─────────┘
+                 │                                             │
+                 └──────────────────┬──────────────────────────┘
+                                    ▼
+                         ┌────────────────────┐
+                         │       @core        │
+                         │                    │
+                         │ TestDataContext    │
+                         │ Dynamic Data       │
+                         │ Sensitive Masking  │
+                         │ Shared Utilities   │
+                         └─────────┬──────────┘
+                                   ▼
+                         ┌────────────────────┐
+                         │      @config       │
+                         │ Environment Config │
+                         │ Zod Validation     │
+                         └────────────────────┘
 ```
-                              ┌──────────────────────────────────────────────┐
-                              │            Playwright Test Runner            │
-                              └──────────────────────┬───────────────────────┘
-                                                     │
-                             ┌───────────────────────┴───────────────────────┐
-                             │               Hybrid Fixtures                 │
-                             │       (apiTest, pageTest, hybridTest)         │
-                             └──────────┬─────────────────────────┬──────────┘
-                                        │                         │
-                 ┌──────────────────────▼───────┐ ┌───────────────▼──────────────┐
-                 │        apps/api-tests        │ │        apps/ui-tests         │
-                 │   - Feature files (.feature) │ │   - Feature files (.feature) │
-                 │   - Step definitions (.ts)   │ │   - Step definitions (.ts)   │
-                 └──────────────┬───────────────┘ └───────────────┬──────────────┘
-                                │                                 │
-   ┌────────────────────────────┼─────────────────────────────────┼────────────────────────────┐
-   │                            ▼                                 ▼                            │
-   │  ┌───────────────────────────────────┐             ┌───────────────────────────────────┐  │
-   │  │       @api-lib (Shared Lib)       │             │       @ui-lib (Shared Lib)        │  │
-   │  │  - ApiClient (HTTP Engine)        │             │  - Page Objects (POM)             │  │
-   │  │  - ApiOperationExecutor (Zod)     │             │  - Resilient Locators             │  │
-   │  │  - Domain Services & Endpoints    │             │  - User Flow Actions              │  │
-   │  │  - Dynamic Payloads & Factories   │             └─────────────────┬─────────────────┘  │
-   │  └─────────────────┬─────────────────┘                               │                    │
-   │                    │                                                 │                    │
-   │                    └───────────────────────┬─────────────────────────┘                    │
-   │                                            ▼                                              │
-   │                           ┌──────────────────────────────────┐                            │
-   │                           │       @core (Shared Lib)         │                            │
-   │                           │  - TestDataContext (State Bus)  │                            │
-   │                           │  - DynamicDataHelper (Faker.js)  │                            │
-   │                           │  - Sensitive Data Masking        │                            │
-   │                           │  - Reusable Constants            │                            │
-   │                           └────────────────┬─────────────────┘                            │
-   │                                            │                                              │
-   │                                            ▼                                              │
-   │                           ┌──────────────────────────────────┐                            │
-   │                           │      @config (Environment)       │                            │
-   │                           │  - Validated by Zod (.env.<env>) │                            │
-   │                           └──────────────────────────────────┘                            │
-   └───────────────────────────────────────────────────────────────────────────────────────────┘
-```
+
+### Architectural responsibilities
+
+| Layer                 | Responsibility                                        |
+| --------------------- | ----------------------------------------------------- |
+| `apps/api-tests`      | API BDD scenarios, steps, and fixtures                |
+| `apps/ui-tests`       | UI BDD scenarios, steps, and page fixtures            |
+| `shared-libs/api-lib` | Reusable API client, schemas, factories, and services |
+| `shared-libs/ui-lib`  | Page Object Model and reusable UI interactions        |
+| `shared-libs/core`    | Test data context, dynamic data, and common utilities |
+| `config`              | Environment loading and validation                    |
 
 ---
 
 ## ✨ Key Features
 
-- **BDD with Gherkin**: Human-readable test specifications written in `.feature` files, compiled at build time by `bddgen` (via `playwright-bdd`).
-- **Hybrid Testing Capability**: UI tests can seamlessly leverage API service steps (e.g., seeding users, retrieving tokens, background setup) within the same scenario to minimize execution time.
-- **Contract-Safe API Automation**: Every API request and response is validated at runtime using **Zod** schemas, catching breaking backend contracts immediately.
-- **Page Object Model (POM)**: Fully typed, encapsulated UI page objects with resilient locators (`getByRole`, semantic selectors) avoiding brittle XPath/CSS selectors.
-- **Dynamic Data Generation**: Synthetic, realistic test data powered by `@faker-js/faker` via `DynamicDataHelper`.
-- **Scenario State Management**: Built-in `TestDataContext` bus to share context between Gherkin steps without dirty global variables.
-- **Data Privacy & Log Masking**: Automatically masks sensitive fields (passwords, tokens, PII) in test execution logs.
-- **Multi-Environment Support**: Clean switching between `dev`, `qa`, `stage`, and `uat` environments with schema validation via `config/environment.ts`.
-- **Parallel & Resilient Execution**: Full parallel execution, retry support, video recording on failure, automatic trace files, and slow-motion support for debugging.
+- **BDD with Gherkin:** Human-readable scenarios using `.feature` files, generated through `playwright-bdd`.
+- **Hybrid Testing:** UI scenarios can reuse API steps for setup and backend operations.
+- **Contract-Safe API Automation:** Request and response validation using Zod schemas.
+- **Page Object Model:** Encapsulated UI interactions using Playwright locators.
+- **Dynamic Test Data:** Synthetic test data using `@faker-js/faker` and UUID-based unique email generation.
+- **Scenario State Management:** `TestDataContext` shares data between steps within a test lifecycle.
+- **Test Isolation:** Fresh scenario context and test-scoped data management.
+- **Sensitive Data Masking:** Sensitive values are masked before logging.
+- **Multi-Environment Support:** Environment selection through `TEST_ENV`.
+- **Parallel Execution:** Playwright parallel execution with configurable worker count.
+- **Failure Diagnostics:** Screenshots, videos, traces, HTML reports, and JUnit XML reports.
 
 ---
 
 ## 📂 Repository Structure
 
-```
+```text
 .
 ├── apps/
-│   ├── api-tests/                     # API Test Application
+│   ├── api-tests/
 │   │   ├── src/
-│   │   │   ├── features/              # Gherkin Feature files (.feature)
-│   │   │   │   ├── admin-login.feature
-│   │   │   │   ├── getall-customers.feature
-│   │   │   │   └── onboarding.feature
-│   │   │   ├── fixtures/              # Playwright test fixtures & dependency injection
-│   │   │   │   ├── api.fixture.ts     # API client & service fixtures
-│   │   │   │   └── hybrid.fixture.ts  # Hybrid test runner entry point
-│   │   │   └── steps/                 # BDD Step definitions (.steps.ts)
-│   │   ├── playwright.config.ts       # API test runner configuration
-│   │   ├── project.json               # Nx project configuration
+│   │   │   ├── features/              # API Gherkin scenarios
+│   │   │   ├── fixtures/              # API and hybrid fixtures
+│   │   │   └── steps/                 # API step definitions
+│   │   ├── playwright.config.ts
+│   │   ├── project.json
 │   │   └── tsconfig.json
 │   │
-│   └── ui-tests/                      # Web UI Test Application
+│   └── ui-tests/
 │       ├── src/
-│       │   ├── features/              # UI Gherkin Feature files
-│       │   │   └── onboarding.feature
-│       │   ├── fixtures/              # UI page object fixtures
-│       │   │   └── pages.fixture.ts
+│       │   ├── features/              # UI Gherkin scenarios
+│       │   ├── fixtures/              # UI page fixtures
 │       │   └── steps/                 # UI step definitions
-│       │       └── onboarding.steps.ts
-│       ├── playwright.config.ts       # UI test runner configuration (Chrome, video, traces)
-│       ├── project.json               # Nx project configuration
+│       ├── playwright.config.ts
+│       ├── project.json
 │       └── tsconfig.json
 │
 ├── shared-libs/
-│   ├── api-lib/                       # Reusable API Client Library (@api-lib)
+│   ├── api-lib/
 │   │   └── src/
-│   │       ├── lib/
-│   │       │   ├── clients/           # ApiClient (HTTP) & ApiOperationExecutor (Zod)
-│   │       │   ├── factories/         # Dynamic request payload factories
-│   │       │   ├── schemas/           # Zod request & response schemas
-│   │       │   ├── services/          # Domain services (AdminLogin, Customer, Onboarding)
-│   │       │   └── api-endpoints.ts   # Centralized endpoint paths catalog
-│   │       └── index.ts               # Barrel exports
+│   │       └── lib/
+│   │           ├── clients/           # API client and operation executor
+│   │           ├── factories/         # Request payload factories
+│   │           ├── schemas/            # Zod schemas
+│   │           ├── services/           # Domain service classes
+│   │           └── api-endpoints.ts    # Centralized endpoints
 │   │
-│   ├── ui-lib/                        # Reusable Page Object Model Library (@ui-lib)
+│   ├── ui-lib/
 │   │   └── src/
-│   │       ├── lib/
-│   │       │   └── pages/             # Page Object classes (Landing, Register, Account, etc.)
-│   │       └── index.ts               # Barrel exports
+│   │       └── lib/
+│   │           └── pages/              # Page Object classes
 │   │
-│   └── core/                          # Cross-Cutting Core Utilities (@core)
+│   └── core/
 │       └── src/
-│           ├── lib/
-│           │   ├── data/              # TestDataContext (scenario state bus)
-│           │   └── utils/             # DynamicDataHelper, Constant, maskSensitiveData
-│           └── index.ts
+│           └── lib/
+│               ├── data/               # TestDataContext
+│               └── utils/              # Dynamic data and utilities
 │
 ├── config/
-│   └── environment.ts                 # Validated environment loader (Zod + dotenv)
-├── .env.qa                            # QA environment configuration
-├── nx.json                            # Nx workspace configuration
-├── pnpm-workspace.yaml                # pnpm workspace definition
-├── tsconfig.base.json                 # Base TypeScript config & path mappings
-└── package.json                       # Root dependencies and scripts
+│   └── environment.ts                  # Environment loader and validation
+│
+├── .env.qa                             # QA environment configuration
+├── nx.json
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+└── package.json
 ```
+
+Generated reports and test artifacts are stored separately inside their respective test application directories.
 
 ---
 
 ## 🧠 Design Patterns & Engineering Highlights
 
-### 1. Zod-Validated API Operations (`ApiOperationExecutor`)
-Rather than making unverified HTTP calls, each API invocation routes through `ApiOperationExecutor`, which enforces:
-- Validating the outgoing request payload against the request schema before dispatching.
-- Parsing and validating the response against `successSchema` or `errorSchema`.
-- Providing full compile-time and runtime type safety.
+### 1. Zod-Validated API Operations
 
-```ts
+API requests are executed through `ApiOperationExecutor`.
+
+Responsibilities include:
+
+- Validating outgoing request payloads.
+- Validating successful responses.
+- Validating error responses.
+- Providing runtime validation and TypeScript type safety.
+
+Example:
+
+```typescript
 const result = await this.apiExecutor.execute({
   method: "POST",
   endpoint: API_ENDPOINTS.AUTH.ADMIN_LOGIN,
@@ -178,203 +196,425 @@ const result = await this.apiExecutor.execute({
 });
 ```
 
-### 2. Scenario State Bus (`TestDataContext`)
-Eliminates test interdependence and dirty global state. Steps pass data (such as generated emails, customer IDs, tokens) downstream within the scenario lifecycle and automatically clean up after execution:
+### 2. Scenario State Management — TestDataContext
 
-```ts
-// In Step A:
+`TestDataContext` provides a mechanism to share data between steps within the same test.
+
+Example:
+
+```typescript
+// Step A
 testDataContext.set("username", username);
 
-// In Step B:
+// Step B
 const username = testDataContext.get<string>("username");
 ```
 
-### 3. Layered Fixture Composition (`test.extend`)
-Fixtures are decoupled across layers:
-- `api.fixture.ts`: Manages `apiClient`, `apiOperationExecutor`, and API service instances.
-- `pages.fixture.ts`: Extends `apiTest` to provide instantiated UI Page Objects with active `page`.
-- `hybrid.fixture.ts`: Aggregates fixtures into an unified runner for test steps.
+The context is created for each test and cleared during fixture teardown to prevent data leakage between tests.
+
+### 3. Layered Fixture Composition
+
+Fixtures are composed using Playwright's `test.extend()`.
+
+- `api.fixture.ts`: Provides API client, operation executor, and API services.
+- `pages.fixture.ts`: Provides UI Page Objects.
+- `hybrid.fixture.ts`: Combines API and UI capabilities for hybrid scenarios.
+
+### 4. Test Isolation
+
+The framework uses test-scoped fixtures and scenario-level data management.
+
+Isolation principles:
+
+- Avoid shared mutable test data.
+- Generate unique test data for independent scenarios.
+- Create a fresh `TestDataContext` for each test.
+- Clear scenario data during teardown.
+- Avoid dependencies between parallel test executions.
 
 ---
 
 ## 🛠 Prerequisites
 
-Ensure you have the following installed on your machine:
+Install the following tools:
 
-- **Node.js**: `v20.x` or `v22.x` (LTS recommended)
-- **pnpm**: `v10.x` (`corepack enable pnpm` or `npm install -g pnpm`)
-- **Browsers**: Supported via Playwright (`chromium`, `firefox`, `webkit`)
+- **Node.js:** v20.x or v22.x (LTS recommended)
+- **pnpm:** v10.x
+- **Git**
+- **Playwright browsers:** Chromium and any other browser required by the configured projects.
+
+Enable pnpm through Corepack if required:
+
+```bash
+corepack enable
+```
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repo-url>
-   cd sdet_banking_automation
-   ```
+### 1. Clone the repository
 
-2. **Install project dependencies**:
-   ```bash
-   pnpm install
-   ```
+```bash
+git clone <repo-url>
+cd sdet_banking_automation
+```
 
-3. **Install Playwright browser binaries and system dependencies**:
-   ```bash
-   pnpm exec playwright install --with-deps
-   ```
+### 2. Install dependencies
 
-4. **Verify type definitions across workspaces**:
-   ```bash
-   pnpm typecheck:api
-   pnpm typecheck:ui
-   ```
+```bash
+pnpm install
+```
+
+### 3. Install Playwright browsers
+
+```bash
+pnpm exec playwright install --with-deps
+```
+
+### 4. Configure environment variables
+
+Create the required environment file, such as `.env.qa`.
+
+Refer to [Environment Configuration](#-environment-configuration).
+
+### 5. Verify TypeScript compilation
+
+```bash
+pnpm typecheck:api
+pnpm typecheck:ui
+```
 
 ---
 
 ## 🌐 Environment Configuration
 
-The framework dynamically loads environment variables based on the `TEST_ENV` variable.
+The framework selects its environment through the `TEST_ENV` variable.
 
-1. By default, the tests use the `qa` environment (`.env.qa`).
-2. Supported environments: `dev`, `qa`, `stage`, `uat`.
+Supported environments:
 
-### Environment File Template (`.env.qa`)
+- `dev`
+- `qa`
+- `stage`
+- `uat`
+
+By default, the framework uses the QA environment.
+
+### Environment file example
+
 ```ini
-DEMO_EMAIL=admin@bank.com
-DEMO_PASSWORD=Admin@123
-BASE_URL=https://banking-app-nine-pi.vercel.app/
+DEMO_EMAIL=your-test-email@example.com
+DEMO_PASSWORD=your-test-password
+BASE_URL=https://your-banking-application-url/
 ```
 
-To run against a different environment, specify `TEST_ENV`:
+Use the appropriate environment file and actual application credentials for your setup.
+
+### Switch environments
+
 ```bash
 TEST_ENV=stage pnpm test:api
 ```
+
+### Security considerations
+
+- Do not commit actual credentials or secrets to Git.
+- Keep sensitive environment files out of version control.
+- Use GitHub Secrets when configuring CI/CD.
+- Avoid printing passwords, tokens, or sensitive personal information in logs.
 
 ---
 
 ## 🧪 Running Tests
 
 ### API Tests
-Executes the BDD code generator (`bddgen`) followed by the Playwright API test suite:
+
+Run all API BDD scenarios:
+
 ```bash
-# Run all API BDD scenarios
 pnpm test:api
+```
 
-# Run with custom environment
+Run API tests against another environment:
+
+```bash
 TEST_ENV=dev pnpm test:api
+```
 
-# Run filtered by Cucumber Tag (e.g. @apiOnboarding)
+Run a specific tag:
+
+```bash
 pnpm exec nx run api-tests:test --grep="@apiOnboarding"
 ```
 
 ### UI Tests
-Executes the UI test suite in headless mode (or headed based on settings):
+
+Run all UI BDD scenarios:
+
 ```bash
-# Run all UI BDD scenarios
 pnpm test:ui
+```
 
-# Run filtered by tag (e.g. @uiOnboarding)
+Run UI tests against another environment:
+
+```bash
+TEST_ENV=stage pnpm test:ui
+```
+
+Run a specific tag:
+
+```bash
 pnpm exec nx run ui-tests:test --grep="@uiOnboarding"
-
-# Run UI tests with UI Mode (interactive debugger)
-pnpm exec nx run ui-tests:test --ui
 ```
 
 ### Type Checking
-Validate TypeScript compilation without emitting output:
-```bash
-# Typecheck API suite
-pnpm typecheck:api
 
-# Typecheck UI suite
+API:
+
+```bash
+pnpm typecheck:api
+```
+
+UI:
+
+```bash
 pnpm typecheck:ui
 ```
 
 ---
 
+## ⚙️ Playwright Execution Configuration
+
+The framework supports configurable worker count, headless/headed execution, retries, and failure diagnostics.
+
+### 1. Configure worker count
+
+By default:
+
+- Local execution uses Playwright's default worker configuration.
+- CI execution uses 4 workers.
+- A custom worker count can be supplied through `WORKERS`.
+
+Example:
+
+```bash
+WORKERS=2 pnpm test:api
+```
+
+For UI:
+
+```bash
+WORKERS=2 pnpm test:ui
+```
+
+The framework validates the worker value and expects a positive integer.
+
+Invalid example:
+
+```bash
+WORKERS=abc pnpm test:api
+```
+
+This produces a descriptive configuration error.
+
+### 2. Headless and headed execution
+
+Headless execution is the default.
+
+Run UI tests with a visible browser:
+
+```bash
+HEADLESS=false pnpm test:ui
+```
+
+Run in headless mode explicitly:
+
+```bash
+HEADLESS=true pnpm test:ui
+```
+
+### 3. CI execution behavior
+
+When `CI` is set:
+
+- Worker count defaults to 4 unless overridden.
+- Retries are enabled.
+- Focused tests using `test.only` are disallowed.
+
+Local execution uses zero retries by default.
+
+### 4. Parallel execution
+
+The framework uses:
+
+```typescript
+fullyParallel: true;
+```
+
+This enables Playwright to distribute tests across available workers.
+
+Tests should remain independent and should not rely on execution order or shared mutable state.
+
+---
+
 ## 📊 Test Reports & Artifacts
 
-After running tests, Playwright automatically generates detailed test execution reports:
+The framework generates separate reports and test artifacts for API and UI test executions.
 
-### Open HTML Report
+### HTML Reports
+
+Open the API HTML report:
+
+```bash
+pnpm exec playwright show-report apps/api-tests/playwright-report
+```
+
+Open the UI HTML report:
+
 ```bash
 pnpm exec playwright show-report apps/ui-tests/playwright-report
 ```
 
-### Artifacts Captured on Failure
-- **Screenshots**: Automatically taken upon step or assertion failures (`screenshot: "only-on-failure"`).
-- **Videos**: Recorded and retained when scenarios fail (`video: "retain-on-failure"`).
-- **Trace Viewer**: Deep inspection traces recorded for thorough debugging (`trace: "on"`):
-  ```bash
-  pnpm exec playwright show-trace test-results/.../trace.zip
-  ```
+### JUnit Reports
+
+JUnit XML reports are generated for CI/CD integration.
+
+| Suite | Report path                        |
+| ----- | ---------------------------------- |
+| API   | `apps/api-tests/reports/junit.xml` |
+| UI    | `apps/ui-tests/reports/junit.xml`  |
+
+### Test Artifacts
+
+The framework captures diagnostic artifacts based on the configured Playwright execution strategy.
+
+| Artifact     | API                                      | UI                      |
+| ------------ | ---------------------------------------- | ----------------------- |
+| HTML report  | Yes                                      | Yes                     |
+| JUnit report | Yes                                      | Yes                     |
+| Screenshot   | Not configured as a default API artifact | Only on failure         |
+| Video        | Not configured as a default API artifact | Retained on failure     |
+| Trace        | Retained on failure                      | Captured on first retry |
+
+### View traces
+
+Use Playwright Trace Viewer:
+
+```bash
+pnpm exec playwright show-trace <path-to-trace.zip>
+```
+
+### Test-results Cleanup
+
+Previous test artifacts and reports are cleaned before the corresponding suite executes.
+
+- API cleanup affects API test artifacts and reports.
+- UI cleanup affects UI test artifacts and reports.
+- Running one suite does not remove the other suite's reports.
+
+This keeps reports isolated and prevents stale results from being mixed with a new execution.
 
 ---
 
-## 🧭 Adding New Tests (Workflow Guide)
+## 🧭 Adding New Tests
 
 ### 1. Adding an API Service & Feature
 
-1. **Define Schema**: Create `shared-libs/api-lib/src/lib/schemas/<domain>.schema.ts` with Zod validation.
-2. **Add Endpoint**: Update `shared-libs/api-lib/src/lib/api-endpoints.ts`.
-3. **Create Payload Factory**: Create payload helper in `shared-libs/api-lib/src/lib/factories/`.
-4. **Create Service Class**: Implement methods in `shared-libs/api-lib/src/lib/services/<domain>.service.ts`.
-5. **Register Fixture**: Inject the service into `apps/api-tests/src/fixtures/api.fixture.ts`.
-6. **Write Feature & Steps**:
-   - Add `.feature` file in `apps/api-tests/src/features/`.
-   - Add `.steps.ts` in `apps/api-tests/src/steps/`.
+1. **Define schema:** Create a Zod schema under `shared-libs/api-lib/src/lib/schemas/`.
+2. **Add endpoint:** Update `shared-libs/api-lib/src/lib/api-endpoints.ts`.
+3. **Create payload factory:** Add a request payload factory under `shared-libs/api-lib/src/lib/factories/`.
+4. **Create service class:** Implement the domain service under `shared-libs/api-lib/src/lib/services/`.
+5. **Register fixture:** Inject the service into `apps/api-tests/src/fixtures/api.fixture.ts`.
+6. **Write feature:** Add a `.feature` file under `apps/api-tests/src/features/`.
+7. **Implement steps:** Add step definitions under `apps/api-tests/src/steps/`.
 
 ### 2. Adding a Page Object & UI Feature
 
-1. **Create Page Object**: Add `shared-libs/ui-lib/src/lib/pages/<page-name>.page.ts` using Playwright Locators.
-2. **Export from Library**: Re-export from `shared-libs/ui-lib/src/index.ts`.
-3. **Register Page Fixture**: Add the page into `apps/ui-tests/src/fixtures/pages.fixture.ts`.
-4. **Write Feature & Steps**:
-   - Add `.feature` in `apps/ui-tests/src/features/`.
-   - Implement corresponding steps in `apps/ui-tests/src/steps/`.
+1. **Create Page Object:** Add the page class under `shared-libs/ui-lib/src/lib/pages/`.
+2. **Export from library:** Re-export the class from `shared-libs/ui-lib/src/index.ts`.
+3. **Register page fixture:** Add the page to `apps/ui-tests/src/fixtures/pages.fixture.ts`.
+4. **Write feature:** Add a `.feature` file under `apps/ui-tests/src/features/`.
+5. **Implement steps:** Add corresponding step definitions under `apps/ui-tests/src/steps/`.
 
 ---
 
 ## ❓ Troubleshooting & FAQ
 
-<details>
-<summary><b>1. Playwright-BDD "Step undefined" or missing generated files</b></summary>
-<br>
+### 1. Playwright-BDD step undefined or generated files missing
 
-Run `bddgen` manually in the test application root to regenerate the glue code:
+Run BDD generation manually from the relevant test application directory:
+
 ```bash
-cd apps/api-tests && pnpm exec bddgen
-# or for UI:
-cd apps/ui-tests && pnpm exec bddgen
+cd apps/api-tests
+pnpm exec bddgen
 ```
-</details>
 
-<details>
-<summary><b>2. TypeScript cannot resolve <code>@api-lib</code> or <code>@ui-lib</code></b></summary>
-<br>
+For UI:
 
-Ensure root path mappings in `tsconfig.base.json` are intact. The project uses:
-- `@config/*` → `./config/*`
-- `@api-lib` → `./shared-libs/api-lib/src/index.ts`
-- `@ui-lib` → `./shared-libs/ui-lib/src/index.ts`
-- `@core` → `./shared-libs/core/src/index.ts`
-</details>
+```bash
+cd apps/ui-tests
+pnpm exec bddgen
+```
 
-<details>
-<summary><b>3. Nx daemon socket permission warning in sandboxes</b></summary>
-<br>
+### 2. TypeScript cannot resolve shared library aliases
 
-If running in restricted sandbox environments or CI containers, prefix with `NX_DAEMON=false`:
+Verify the path mappings in `tsconfig.base.json`.
+
+The framework uses aliases such as:
+
+- `@config/*`
+- `@api-lib`
+- `@ui-lib`
+- `@core`
+
+### 3. Browser does not open during UI execution
+
+Headless mode is enabled by default.
+
+Run:
+
+```bash
+HEADLESS=false pnpm test:ui
+```
+
+### 4. Invalid WORKERS configuration
+
+Ensure that `WORKERS` is a positive integer.
+
+Example:
+
+```bash
+WORKERS=2 pnpm test:api
+```
+
+### 5. Nx daemon socket permission warning
+
+In restricted environments, try:
+
 ```bash
 NX_DAEMON=false pnpm test:api
 ```
-</details>
+
+### 6. Report not found
+
+Run the relevant test suite first to generate its report, then open the corresponding report directory.
+
+For API:
+
+```bash
+pnpm test:api
+pnpm exec playwright show-report apps/api-tests/playwright-report
+```
+
+For UI:
+
+```bash
+pnpm test:ui
+pnpm exec playwright show-report apps/ui-tests/playwright-report
+```
 
 ---
 
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-

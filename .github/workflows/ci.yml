@@ -1,0 +1,109 @@
+name: Banking Automation CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    name: API Automation Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      CI: true
+      HEADLESS: true
+      DEMO_EMAIL: ${{ secrets.DEMO_EMAIL }}
+      DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+      BASE_URL: ${{ vars.BASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: pnpm
+
+      - name:   
+        run: pnpm install --frozen-lockfile
+
+      - name: API Typecheck
+        run: pnpm typecheck:api
+
+      - name: Run API Tests
+        run: pnpm test:api
+
+      - name: Upload API Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-test-reports
+          path: |
+            apps/api-tests/playwright-report/
+            apps/api-tests/reports/
+            apps/api-tests/test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  ui-tests:
+    name: UI Automation Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      CI: true
+      HEADLESS: true
+      DEMO_EMAIL: ${{ secrets.DEMO_EMAIL }}
+      DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+      BASE_URL: ${{ vars.BASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: UI Typecheck
+        run: pnpm typecheck:ui
+
+      - name: Run UI Tests
+        run: pnpm test:ui
+
+      - name: Upload UI Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-test-reports
+          path: |
+            apps/ui-tests/playwright-report/
+            apps/ui-tests/reports/
+            apps/ui-tests/test-results/
+          if-no-files-found: warn
+          retention-days: 14
