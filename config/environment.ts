@@ -10,21 +10,11 @@ const selectedEnvironment = environmentSchema.safeParse(
 
 if (!selectedEnvironment.success) {
   throw new Error(
-    `Invalid TEST_ENV. Supported environments: dev, qa, stage, uat.`,
+    "Invalid TEST_ENV. Supported environments: dev, qa, stage, uat.",
   );
 }
 
 export const testEnvironment = selectedEnvironment.data;
-
-const envFilePath = resolve(__dirname, "..", `.env.${testEnvironment}`);
-
-const dotenvResult = dotenv.config({
-  path: envFilePath,
-});
-
-if (dotenvResult.error) {
-  throw new Error(`Unable to load environment file: .env.${testEnvironment}`);
-}
 
 const configSchema = z.object({
   BASE_URL: z.url(),
@@ -32,4 +22,19 @@ const configSchema = z.object({
   DEMO_PASSWORD: z.string().min(1),
 });
 
+// Local execution loads environment variables from the selected file.
+// CI execution uses environment variables injected by GitHub Actions.
+if (process.env.CI !== "true") {
+  const envFilePath = resolve(__dirname, "..", `.env.${testEnvironment}`);
+
+  const dotenvResult = dotenv.config({
+    path: envFilePath,
+  });
+
+  if (dotenvResult.error) {
+    throw new Error(`Unable to load environment file: .env.${testEnvironment}`);
+  }
+}
+
+// Validate environment variables after loading them.
 export const config = configSchema.parse(process.env);
