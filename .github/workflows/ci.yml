@@ -2,24 +2,47 @@ name: Banking Automation CI
 
 on:
   push:
+
   pull_request:
+
   workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Select target environment"
+        required: true
+        type: choice
+        default: qa
+        options:
+          - dev
+          - qa
+          - stage
+          - uat
 
 permissions:
   contents: read
 
 jobs:
+  # ==========================================
+  # API AUTOMATION TESTS
+  # ==========================================
+
   api-tests:
     name: API Automation Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'qa' }}
+
     env:
       CI: true
       HEADLESS: true
+
+      TEST_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'qa' }}
+
+      BASE_URL: ${{ vars.BASE_URL }}
       DEMO_EMAIL: ${{ secrets.DEMO_EMAIL }}
       DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
-      BASE_URL: ${{ vars.BASE_URL }}
 
     steps:
       - name: Checkout repository
@@ -36,7 +59,7 @@ jobs:
           node-version: 20.20.2
           cache: pnpm
 
-      - name:   
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: API Typecheck
@@ -57,17 +80,27 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  # ==========================================
+  # UI AUTOMATION TESTS
+  # ==========================================
+
   ui-tests:
     name: UI Automation Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'qa' }}
+
     env:
       CI: true
       HEADLESS: true
+
+      TEST_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'qa' }}
+
+      BASE_URL: ${{ vars.BASE_URL }}
       DEMO_EMAIL: ${{ secrets.DEMO_EMAIL }}
       DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
-      BASE_URL: ${{ vars.BASE_URL }}
 
     steps:
       - name: Checkout repository
