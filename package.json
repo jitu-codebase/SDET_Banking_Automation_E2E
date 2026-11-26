@@ -10,7 +10,8 @@
     "test:ui": "pnpm clean:ui && nx run ui-tests:test",
     "typecheck:ui": "nx run ui-tests:typecheck",
     "report:api": "pnpm exec playwright show-report apps/api-tests/playwright-report",
-    "report:ui": "pnpm exec playwright show-report apps/ui-tests/playwright-report"
+    "report:ui": "pnpm exec playwright show-report apps/ui-tests/playwright-report",
+    "git:push": "node scripts/git-push.mjs"
   },
   "private": true,
   "devDependencies": {
